@@ -3,7 +3,9 @@ library(dplyr)
 library(descr)
 
 EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
-#Subset to people who said yes: EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
+#Subset to people who said yes: freq(EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
+names(EWBW)[names(EWBW)== "Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps."] <- "Eligible"
+
 ##Starting the data cleaning process############################################################################################################
 
 #Age
@@ -196,8 +198,8 @@ EWBW$SumPoint <- EWBW$HH3Point + EWBW$HH4Point + EWBW$AD1Point + EWBW$AD2Point +
 
 
 EWBW$Household_Security [EWBW$SumPoint<=1] <- "High"
-EWBW$Household_Security [EWBW$SumPoint>1 & EWBW$SumPoint<4] <- "Low"
-EWBW$Household_Security [EWBW$SumPoint>=4] <- "Very Low"
+EWBW$Household_Security [EWBW$SumPoint>1 & EWBW$SumPoint<=4] <- "Low"
+EWBW$Household_Security [EWBW$SumPoint>=5] <- "Very Low"
 
 ##Subsetting to start analysis ##############################################################################################################
 var.keep <- c("Household_Security","Record.ID","Complete.", "Awareness","Weekspermonth_on_SNAP", "Adequate", "Years_on_SNAP", "Children", "Household_Income","Hispanic_Latino", "race", "Age")
@@ -290,6 +292,8 @@ summary(my.logreg2)  # for p-values
 
 my.logreg3 <- glm(AwarenessBin ~ Children + factor(Weekspermonth_on_SNAP):Children, data = subset_data, family = "binomial") #Interaction with Weeks per month and Children, : or *
 summary(my.logreg3)  # for p-values 
+
+#PLEASE DO: Children as a moderating by subsetting to two datasets.
 
 my.logreg3 <- glm(AwarenessBin ~ Children + factor(race) + factor(Weekspermonth_on_SNAP) + factor(Years_on_SNAP), data = subset_data, family = "binomial") 
 summary(my.logreg3)  # for p-values 

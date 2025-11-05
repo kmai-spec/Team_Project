@@ -3,13 +3,14 @@ library(dplyr)
 library(descr)
 
 EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
-
+#Subset to people who said yes: EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
 ##Starting the data cleaning process############################################################################################################
 
 #Age
 names(EWBW)[names(EWBW)== "How.old.are.you."] <- "Age"
 EWBW$Age[EWBW$Age>120]<- NA
 EWBW$Age<-as.numeric(EWBW$Age)
+
 
 #Race Variables
 names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Please.select.all.that.apply..choice.African.American.or.Black."] <- "African American/Black"
@@ -181,7 +182,7 @@ EWBW$HH4Point [EWBW$HH4=="Often true" | EWBW$HH4=="Sometimes true"] <- 1
 
 EWBW$AD1Point <- NA
 EWBW$AD1Point [EWBW$AD1=="No"] <- 0
-EWBW$AD1Point [EWBW$AD1=="Yes, almost every month" | EWBW$AD1=="Yes, some months but not every month"] <- 1
+EWBW$AD1Point [EWBW$AD1=="Yes, almost every month" | EWBW$AD1=="Yes, some months but not every month"] <- 2
 
 EWBW$AD2Point <- NA
 EWBW$AD2Point [EWBW$AD2=="No"] <- 0

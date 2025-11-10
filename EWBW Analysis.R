@@ -5,6 +5,57 @@ library(descr)
 EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
 #Subset to people who said yes: freq(EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
 names(EWBW)[names(EWBW)== "Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps."] <- "Eligible"
+#Number of Years on SNAP
+names(EWBW)[names(EWBW)== "How.long.have.you.been.receiving.SNAP.benefits...also.known.as.food.stamps..or.EBT...."] <- "Years_on_SNAP"
+EWBW$Years_on_SNAP[EWBW$Years_on_SNAP==""] <- "NA"
+EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="Choose not to answer"] <- "NA"
+EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="Unsure"] <- "NA"
+EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="NA"] <- NA
+
+#If SNAP Adequately supports the household per month
+names(EWBW)[names(EWBW)== "Do.you.feel.that.your.SNAP.benefits.give.you.enough.money.to.feed.your.household.each.month."] <- "Adequate"
+EWBW$Adequate[EWBW$Adequate==""] <- "NA"
+EWBW$Adequate[EWBW$Adequate=="Choose not to answer"] <- "NA"
+EWBW$Adequate[EWBW$Adequate=="Unsure"] <- "NA"
+EWBW$Adequate[EWBW$Adequate=="NA"] <- NA
+
+#Number of Weeks SNAP would last per month
+names(EWBW)[names(EWBW)== "How.many.weeks.do.your.SNAP.benefits.typically.last.during.an.average.month."] <- "Weekspermonth_on_SNAP"
+EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP==""] <- "NA"
+EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="Choose not to answer"] <- "NA"
+EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="Unsure"] <- "NA"
+EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="NA"] <- NA
+
+#Awareness of EWBW Variables - Consolidation
+names(EWBW)[names(EWBW)== "Have.you.noticed.that.you.ve.been.receiving.money.back.on.your.EBT.card.when.purchasing.fresh.fruits.and.vegetables."] <- "MoneyBack"
+names(EWBW)[names(EWBW)== "Had.you.heard.of.the.Eat.Well..Be.Well.program.before.receiving.the.letter.that.invited.you.to.take.this.survey..."] <- "HEARDABOUT_EWBW"
+EWBW$MoneyBack[EWBW$MoneyBack==""] <- "NA"
+EWBW$MoneyBack[EWBW$MoneyBack=="Choose not to answer"] <- "NA"
+EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW==""] <- "NA"
+EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW=="Choose not to answer"] <- "NA"
+
+EWBW$Awareness[EWBW$MoneyBack== "NA"& EWBW$HEARDABOUT_EWBW=="NA"]<-"NA"
+EWBW$Awareness[EWBW$MoneyBack== "Unsure"| EWBW$HEARDABOUT_EWBW=="Unsure"]<-"NA"
+EWBW$Awareness[EWBW$MoneyBack== "No"| EWBW$HEARDABOUT_EWBW=="No"]<-"No"
+EWBW$Awareness[EWBW$MoneyBack== "Yes"| EWBW$HEARDABOUT_EWBW=="Yes"]<-"Yes"
+EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW=="NA"] <- NA
+
+
+
+EWBW <- EWBW %>%
+  mutate(
+    not_eligible = if_else(
+      is.na(Years_on_SNAP ) &
+        is.na(Adequate) &
+        is.na(Weekspermonth_on_SNAP) &
+        is.na(HEARDABOUT_EWBW),
+      1, 0
+    )
+  )
+freq(EWBW$not_eligible)
+
+# exclude those not eligible to participate (n=1216)
+EWBW <- EWBW %>% filter(not_eligible == 0)
 
 ##Starting the data cleaning process############################################################################################################
 
@@ -50,17 +101,13 @@ EWBW$Hispanic_Latino[EWBW$Hispanic_Latino=="Choose not to answer"] <- "NA"
 EWBW$Hispanic_Latino[EWBW$Hispanic_Latino=="Don't Know"] <- "NA"
 
 #Household Information
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes.."] <- "Household_Income"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...1"] <- "Household_Income1"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...2"] <- "Household_Income2"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...3"] <- "Household_Income3"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...4"] <- "Household_Income4"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...5"] <- "Household_Income5"
-names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...6"] <- "Household_Income6"
-
-EWBW$Household_Income[EWBW$Household_Income==""] <- "NA"
-EWBW$Household_Income[EWBW$Household_Income=="Choose not to answer"] <- "NA"
-EWBW$Household_Income[EWBW$Household_Income=="Don't know"] <- "NA"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes.."] <- "Household_Income1"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...1"] <- "Household_Income2"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...2"] <- "Household_Income3"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...3"] <- "Household_Income4"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...4"] <- "Household_Income5"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...5"] <- "Household_Income6"
+names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...6"] <- "Household_Income7"
 
 EWBW$Household_Income1[EWBW$Household_Income1==""] <- "NA"
 EWBW$Household_Income1[EWBW$Household_Income1=="Choose not to answer"] <- "NA"
@@ -86,61 +133,86 @@ EWBW$Household_Income6[EWBW$Household_Income6==""] <- "NA"
 EWBW$Household_Income6[EWBW$Household_Income6=="Choose not to answer"] <- "NA"
 EWBW$Household_Income6[EWBW$Household_Income6=="Don't know"] <- "NA"
 
-EWBW$Real_Income[EWBW$Household_Income!="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income[EWBW$Household_Income != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1!="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income1[EWBW$Household_Income1 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2!="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income2[EWBW$Household_Income2 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3!="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income3[EWBW$Household_Income3 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4!="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income4[EWBW$Household_Income4 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5!="NA" & EWBW$Household_Income6=="NA"] <- EWBW$Household_Income5[EWBW$Household_Income5 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6!="NA"] <- EWBW$Household_Income6[EWBW$Household_Income6 != "NA"]
-EWBW$Real_Income[EWBW$Household_Income=="NA" & EWBW$Household_Income1=="NA" & EWBW$Household_Income2=="NA" & EWBW$Household_Income3=="NA" & EWBW$Household_Income4=="NA" & EWBW$Household_Income5=="NA" & EWBW$Household_Income6=="NA"] <- "NA"
-EWBW$Real_Income[EWBW$Real_Income==""] <- "NA"
+EWBW$Household_Income7[EWBW$Household_Income7==""] <- "NA"
+EWBW$Household_Income7[EWBW$Household_Income7=="Choose not to answer"] <- "NA"
+EWBW$Household_Income7[EWBW$Household_Income7=="Don't know"] <- "NA"
 
-EWBW$Real_Income[EWBW$Real_Income=="Choose not to answer"] <- "NA"
-EWBW$Real_Income[EWBW$Real_Income=="Don't know"] <- "NA"
+#EWBW$Real_Income[EWBW$Real_Income=="Choose not to answer"] <- "NA"
+#EWBW$Real_Income[EWBW$Real_Income=="Don't know"] <- "NA"
 
-var.keep <- c("Real_Income","Household_Income","Household_Income1", "Household_Income2","Household_Income3", "Household_Income4", "Household_Income5", "Household_Income6")
-income_data <- EWBW[, var.keep]
-freq(income_data$Real_Income)
+EWBW$Household_Income1[EWBW$Household_Income1=="NA"] <- NA
+EWBW$Household_Income2[EWBW$Household_Income2=="NA"] <- NA
+EWBW$Household_Income3[EWBW$Household_Income3=="NA"] <- NA
+EWBW$Household_Income4[EWBW$Household_Income4=="NA"] <- NA
+EWBW$Household_Income5[EWBW$Household_Income5=="NA"] <- NA
+EWBW$Household_Income6[EWBW$Household_Income6=="NA"] <- NA
 
+EWBW <- EWBW %>%
+  mutate(
+    poverty_level = case_when(
+      # Household size = 1
+      !is.na(Household_Income1) & Household_Income1 == "Below $15,000"                ~ "<100%",
+      !is.na(Household_Income1) & Household_Income1 == "$15,000 to $30,000"           ~ "100%-200%",
+      !is.na(Household_Income1) & Household_Income1 == "$30,001 to $45,000"           ~ "200%-300%",
+      !is.na(Household_Income1) & Household_Income1 == "$45,001 to $60,000"           ~ "300%-400%",
+      !is.na(Household_Income1) & Household_Income1 == "$60,001 to $75,000"           ~ "400%-500%",
+      !is.na(Household_Income1) & Household_Income1 == "Above $75,000"                ~ ">500%",
 
-EWBW$Household_Income[EWBW$Household_Income==""] <- "NA"
-EWBW$Household_Income[EWBW$Household_Income=="Choose not to answer"] <- "NA"
-EWBW$Household_Income[EWBW$Household_Income=="Don't know"] <- "NA"
+      # Household size = 2
+      !is.na(Household_Income2) & Household_Income2 == "Below $20,000"                ~ "<100%",
+      !is.na(Household_Income2) & Household_Income2 == "$20,001 to $40,000"           ~ "100%-200%",
+      !is.na(Household_Income2) & Household_Income2 == "$40,001 to $60,000"           ~ "200%-300%",
+      !is.na(Household_Income2) & Household_Income2 == "$60,001 to $80,000"           ~ "300%-400%",
+      !is.na(Household_Income2) & Household_Income2 == "$80,001 to $100,000"          ~ "400%-500%",
+      !is.na(Household_Income2) & Household_Income2 == "Above $100,000"               ~ ">500%",
+
+      # Household size = 3
+      !is.na(Household_Income3) & Household_Income3 == "Below $25,000"                ~ "<100%",
+      !is.na(Household_Income3) & Household_Income3 == "$25,001 to $50,000"           ~ "100%-200%",
+      !is.na(Household_Income3) & Household_Income3 == "$50,001 to $75,000"           ~ "200%-300%",
+      !is.na(Household_Income3) & Household_Income3 == "$75,001 to $100,000"          ~ "300%-400%",
+      !is.na(Household_Income3) & Household_Income3 == "$100,001 to $125,000"         ~ "400%-500%",
+      !is.na(Household_Income3) & Household_Income3 == "Above $125,000"               ~ ">500%",
+
+      # Household size = 4
+      !is.na(Household_Income4) & Household_Income4 == "Below $30,000"                ~ "<100%",
+      !is.na(Household_Income4) & Household_Income4 == "$30,001 to $60,000"           ~ "100%-200%",
+      !is.na(Household_Income4) & Household_Income4 == "$60,001 to $90,000"           ~ "200%-300%",
+      !is.na(Household_Income4) & Household_Income4 == "$90,001 to $120,000"          ~ "300%-400%",
+      !is.na(Household_Income4) & Household_Income4 == "$120,001 to $150,000"         ~ "400%-500%",
+      !is.na(Household_Income4) & Household_Income4 == "Above $150,000"               ~ ">500%",
+
+      # Household size = 5
+      !is.na(Household_Income5) & Household_Income5 == "Below $35,000"                ~ "<100%",
+      !is.na(Household_Income5) & Household_Income5 == "$35,001 to $70,000"           ~ "100%-200%",
+      !is.na(Household_Income5) & Household_Income5 == "$70,001 to $105,000"          ~ "200%-300%",
+      !is.na(Household_Income5) & Household_Income5 == "$105,001 to $140,000"         ~ "300%-400%",
+      !is.na(Household_Income5) & Household_Income5 == "$140,001 to $175,000"         ~ "400%-500%",
+      !is.na(Household_Income5) & Household_Income5 == "Above $175,000"               ~ ">500%",
+
+      # Household size = 6
+      !is.na(Household_Income6) & Household_Income6 == "Below $40,000"                ~ "<100%",
+      !is.na(Household_Income6) & Household_Income6 == "$40,001 to $80,000"           ~ "100%-200%",
+      !is.na(Household_Income6) & Household_Income6 == "$80,001 to $120,000"          ~ "200%-300%",
+      !is.na(Household_Income6) & Household_Income6 == "$120,001 to $160,000"         ~ "300%-400%",
+      !is.na(Household_Income6) & Household_Income6 == "$160,001 to $200,000"         ~ "400%-500%",
+      !is.na(Household_Income6) & Household_Income6 == "Above $200,000"               ~ ">500%",
+      
+      # Household size = 7
+      !is.na(Household_Income7) & Household_Income7 == "Below $45,000"                ~ "<100%",
+      !is.na(Household_Income7) & Household_Income7 == "$45,001 to $90,000"           ~ "100%-200%",
+      !is.na(Household_Income7) & Household_Income7 == "Above $225,000"               ~ ">500%",   
+    )
+  )
+freq(EWBW$poverty_level)
+
+# collapse smaller categories
+EWBW$poverty_level_Real <- EWBW$poverty_level
+EWBW$poverty_level_Real[EWBW$poverty_level %in% c("200%-300%","300%-400%","400%-500%",">500%")] <- ">200%"
+freq(EWBW$poverty_level_Real)
 
 names(EWBW)[names(EWBW)== "How.many.children.are.in.your.household."] <- "Children"
 EWBW$Children<-as.numeric(EWBW$Children)
-
-#Number of Years on SNAP
-names(EWBW)[names(EWBW)== "How.long.have.you.been.receiving.SNAP.benefits...also.known.as.food.stamps..or.EBT...."] <- "Years_on_SNAP"
-EWBW$Years_on_SNAP[EWBW$Years_on_SNAP==""] <- "NA"
-EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="Choose not to answer"] <- "NA"
-EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="Unsure"] <- "NA"
-
-#If SNAP Adequately supports the household per month
-names(EWBW)[names(EWBW)== "Do.you.feel.that.your.SNAP.benefits.give.you.enough.money.to.feed.your.household.each.month."] <- "Adequate"
-EWBW$Adequate[EWBW$Adequate==""] <- "NA"
-EWBW$Adequate[EWBW$Adequate=="Choose not to answer"] <- "NA"
-EWBW$Adequate[EWBW$Adequate=="Unsure"] <- "NA"
-
-#Number of Weeks SNAP would last per month
-names(EWBW)[names(EWBW)== "How.many.weeks.do.your.SNAP.benefits.typically.last.during.an.average.month."] <- "Weekspermonth_on_SNAP"
-EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP==""] <- "NA"
-EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="Choose not to answer"] <- "NA"
-EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="Unsure"] <- "NA"
-
-#Awareness of EWBW Variables - Consolidation
-names(EWBW)[names(EWBW)== "Have.you.noticed.that.you.ve.been.receiving.money.back.on.your.EBT.card.when.purchasing.fresh.fruits.and.vegetables."] <- "MoneyBack"
-names(EWBW)[names(EWBW)== "Had.you.heard.of.the.Eat.Well..Be.Well.program.before.receiving.the.letter.that.invited.you.to.take.this.survey..."] <- "HEARDABOUT_EWBW"
-EWBW$MoneyBack[EWBW$MoneyBack==""] <- "NA"
-EWBW$MoneyBack[EWBW$MoneyBack=="Choose not to answer"] <- "NA"
-EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW==""] <- "NA"
-EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW=="Choose not to answer"] <- "NA"
-
-EWBW$Awareness[EWBW$MoneyBack== "NA"& EWBW$HEARDABOUT_EWBW=="NA"]<-"NA"
-EWBW$Awareness[EWBW$MoneyBack== "Unsure"| EWBW$HEARDABOUT_EWBW=="Unsure"]<-"NA"
-EWBW$Awareness[EWBW$MoneyBack== "No"| EWBW$HEARDABOUT_EWBW=="No"]<-"No"
-EWBW$Awareness[EWBW$MoneyBack== "Yes"| EWBW$HEARDABOUT_EWBW=="Yes"]<-"Yes"
 
 #Creating the US Household Food Security
 names(EWBW)[names(EWBW)== "X.The.food.that.we.bought.just.didn.t.last.and.we.didn.t.have.money.to.get.more...Was.that.often..sometimes..or.never.true.for..you.or.your.household.n.the.last.12.months.."] <- "HH3"
@@ -202,106 +274,101 @@ EWBW$Household_Security [EWBW$SumPoint>1 & EWBW$SumPoint<=4] <- "Low"
 EWBW$Household_Security [EWBW$SumPoint>=5] <- "Very Low"
 
 ##Subsetting to start analysis ##############################################################################################################
-var.keep <- c("Household_Security","Record.ID","Complete.", "Awareness","Weekspermonth_on_SNAP", "Adequate", "Years_on_SNAP", "Children", "Household_Income","Hispanic_Latino", "race", "Age")
-subset_data <- EWBW[, var.keep]
-
-subset_data$Awareness[subset_data$Awareness=="NA"]<-NA
-subset_data$Weekspermonth_on_SNAP[subset_data$Weekspermonth_on_SNAP=="NA"]<-NA
-subset_data$Adequate[subset_data$Adequate=="NA"]<-NA
-subset_data$Years_on_SNAP[subset_data$Years_on_SNAP=="NA"]<-NA
-subset_data$Household_Income[subset_data$Household_Income=="NA"]<-NA
-subset_data$Hispanic_Latino[subset_data$Hispanic_Latino=="NA"]<-NA
-subset_data$race[subset_data$race=="NA"]<-NA
+EWBW$Awareness[EWBW$Awareness=="NA"]<-NA
+EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="NA"]<-NA
+EWBW$Adequate[EWBW$Adequate=="NA"]<-NA
+EWBW$Years_on_SNAP[EWBW$Years_on_SNAP=="NA"]<-NA
+EWBW$Household_Income[EWBW$poverty_level_Real=="NA"]<-NA
+EWBW$Hispanic_Latino[EWBW$Hispanic_Latino=="NA"]<-NA
+EWBW$race[EWBW$race=="NA"]<-NA
 
 #Descriptive statistics
-summary(subset_data$Age) 
-freq(subset_data$Awareness)
-summary(subset_data$Children) 
-freq(subset_data$Weekspermonth_on_SNAP)
-freq(subset_data$Years_on_SNAP)
-freq(subset_data$Household_Income)
-freq(subset_data$Hispanic_Latino)
-freq(subset_data$race)
-freq(subset_data$Household_Security)
+summary(EWBW$Age) 
+freq(EWBW$Awareness)
+summary(EWBW$Children) 
+freq(EWBW$Weekspermonth_on_SNAP)
+freq(EWBW$Years_on_SNAP)
+freq(EWBW$poverty_level_Real)
+freq(EWBW$Hispanic_Latino)
+freq(EWBW$race)
+freq(EWBW$Household_Security)
 
 #Univariate Graphs of Interest
 #Awareness is the main response variable
-ggplot(data=subset_data)+
+ggplot(data=EWBW)+
   geom_bar(aes(x=Awareness))+
   ggtitle("Awareness of EWBW Program")
 
 #Removing the NA from the Awareness column temporary for Graph
-subset_data |>
+EWBW |>
   filter(!is.na(Awareness)) |> 
   ggplot(aes(x = Awareness)) + 
   geom_bar() + 
   ggtitle("Awareness of EWBW Program")
 
 #Children and household income as an explanatory variable
-ggplot(data=subset_data)+
+ggplot(data=EWBW)+
   geom_histogram(aes(x=Children))+
   ggtitle("Number of Children")
 
-ggplot(data=subset_data)+
-  geom_bar(aes(x=Household_Income))+
+ggplot(data=EWBW)+
+  geom_bar(aes(x=Household_Security))+
   ggtitle("Household Income of Respondents")
 
 #Removing the NA from the Household income column temporary for Graph
-subset_data |>
-  filter(!is.na(Household_Income)) |> 
-  ggplot(aes(x = Household_Income)) + 
+EWBW |>
+  filter(!is.na(Household_Security)) |> 
+  ggplot(aes(x = Household_Security)) + 
   geom_bar() + 
   ggtitle("Household Income of Respondents")
 
 #Race of Respondents
-subset_data |>
+EWBW |>
   filter(!is.na(race)) |> 
   ggplot(aes(x = race)) + 
   geom_bar() + 
   ggtitle("Race of Respondents")
 
 #Main Variables of Interest: Awareness and # of Children
-ggplot(data=subset_data) +
+ggplot(data=EWBW) +
   stat_summary(aes(x=Children, y=Awareness),  fun="mean", geom="bar") +
   ylab("Awareness") +
   xlab("Average number of Children") + 
   ggtitle("Number of Children and Awareness")
 
 #Awareness and Household Income
-tab1 <- table(subset_data$Awareness, subset_data$Household_Income)
+tab1 <- table(EWBW$Awareness, EWBW$Household_Security)
 
 ##Hypothesis Testing##############################################################################################################
 #myChi <- chisq.test(myData$CategResponseVar, myData$CategExplanatoryVar) 
-myChi <- chisq.test(subset_data$Awareness, subset_data$Children) 
+myChi <- chisq.test(EWBW$Awareness, EWBW$Children) 
 myChi 
 
-myChi2 <- chisq.test(subset_data$Awareness, subset_data$Household_Income) 
+myChi2 <- chisq.test(EWBW$Awareness, EWBW$Household_Security) 
 myChi2
 
-subset_data$AwarenessBin[subset_data$Awareness=="Yes"]<-1
-subset_data$AwarenessBin[subset_data$Awareness=="No"]<-0
+EWBW$AwarenessBin[EWBW$Awareness=="Yes"]<-1
+EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
 
 #Logistic Regression
-my.logreg <- glm(AwarenessBin ~ Children, data = subset_data, family = "binomial") 
+my.logreg <- glm(AwarenessBin ~ Children, data = EWBW, family = "binomial") 
 summary(my.logreg)  # for p-values 
 exp(my.logreg$coefficients)  # for odds ratios 
 exp(confint(my.logreg))  # for confidence intervals on the odds ratios
 
-my.logreg2 <- glm(AwarenessBin ~ Children + factor(race), data = subset_data, family = "binomial") 
+my.logreg2 <- glm(AwarenessBin ~ Children + factor(race), data = EWBW, family = "binomial") 
 summary(my.logreg2)  # for p-values 
 
-my.logreg3 <- glm(AwarenessBin ~ Children + factor(Weekspermonth_on_SNAP):Children, data = subset_data, family = "binomial") #Interaction with Weeks per month and Children, : or *
+my.logreg3 <- glm(AwarenessBin ~ Children + factor(Weekspermonth_on_SNAP):Children, data = EWBW, family = "binomial") #Interaction with Weeks per month and Children, : or *
 summary(my.logreg3)  # for p-values 
 
-#PLEASE DO: Children as a moderating by subsetting to two datasets.
-
-my.logreg3 <- glm(AwarenessBin ~ Children + factor(race) + factor(Weekspermonth_on_SNAP) + factor(Years_on_SNAP), data = subset_data, family = "binomial") 
+my.logreg3 <- glm(AwarenessBin ~ Children + factor(race) + factor(Weekspermonth_on_SNAP) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg3)  # for p-values 
 
-my.logreg4 <- glm(AwarenessBin ~ factor(Household_Income) + factor(Years_on_SNAP), data = subset_data, family = "binomial") 
+my.logreg4 <- glm(AwarenessBin ~ factor(Household_Security) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg4)  # for p-values 
 
-my.logreg5 <- glm(AwarenessBin ~ factor(Years_on_SNAP), data = subset_data, family = "binomial") 
+my.logreg5 <- glm(AwarenessBin ~ factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg5)  # for p-values 
 
 ##Implications and Analysis##############################################################################################################

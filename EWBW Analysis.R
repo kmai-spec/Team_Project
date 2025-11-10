@@ -311,9 +311,11 @@ ggplot(data=EWBW)+
   geom_histogram(aes(x=Children))+
   ggtitle("Number of Children")
 
-ggplot(data=EWBW)+
-  geom_bar(aes(x=Household_Security))+
-  ggtitle("Household Income of Respondents")
+EWBW |>
+  filter(!is.na(Household_Security)) |> 
+  ggplot(aes(x = Household_Security)) + 
+  geom_bar() + 
+  ggtitle("Awareness of EWBW Program")
 
 #Removing the NA from the Household income column temporary for Graph
 EWBW |>
@@ -329,6 +331,13 @@ EWBW |>
   geom_bar() + 
   ggtitle("Race of Respondents")
 
+#poverty_level_Real of Respondents
+EWBW |>
+  filter(!is.na(poverty_level_Real)) |> 
+  ggplot(aes(x = poverty_level_Real)) + 
+  geom_bar() + 
+  ggtitle("poverty_level_Real of Respondents")
+
 #Main Variables of Interest: Awareness and # of Children
 ggplot(data=EWBW) +
   stat_summary(aes(x=Children, y=Awareness),  fun="mean", geom="bar") +
@@ -340,7 +349,6 @@ ggplot(data=EWBW) +
 tab1 <- table(EWBW$Awareness, EWBW$Household_Security)
 
 ##Hypothesis Testing##############################################################################################################
-#myChi <- chisq.test(myData$CategResponseVar, myData$CategExplanatoryVar) 
 myChi <- chisq.test(EWBW$Awareness, EWBW$Children) 
 myChi 
 
@@ -352,28 +360,24 @@ EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
 
 #Logistic Regression
 my.logreg <- glm(AwarenessBin ~ Children, data = EWBW, family = "binomial") 
-summary(my.logreg)  # for p-values 
-exp(my.logreg$coefficients)  # for odds ratios 
-exp(confint(my.logreg))  # for confidence intervals on the odds ratios
+summary(my.logreg)
+exp(my.logreg$coefficients) 
 
-my.logreg2 <- glm(AwarenessBin ~ Children + factor(race), data = EWBW, family = "binomial") 
+my.logreg1 <- glm(AwarenessBin ~ poverty_level_Real, data = EWBW, family = "binomial") 
+summary(my.logreg1)
+exp(my.logreg1$coefficients) 
+
+my.logreg2 <- glm(AwarenessBin ~ factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg2)  # for p-values 
 
-my.logreg3 <- glm(AwarenessBin ~ Children + factor(Weekspermonth_on_SNAP):Children, data = EWBW, family = "binomial") #Interaction with Weeks per month and Children, : or *
+my.logreg3 <- glm(AwarenessBin ~ Children + factor(race) + poverty_level_Real, data = EWBW, family = "binomial") 
 summary(my.logreg3)  # for p-values 
 
-my.logreg3 <- glm(AwarenessBin ~ Children + factor(race) + factor(Weekspermonth_on_SNAP) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
-summary(my.logreg3)  # for p-values 
-
-my.logreg4 <- glm(AwarenessBin ~ factor(Household_Security) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg4 <- glm(AwarenessBin ~ Children + poverty_level_Real + factor(Weekspermonth_on_SNAP):Children, data = EWBW, family = "binomial") #Interaction with Weeks per month and Children, : or *
 summary(my.logreg4)  # for p-values 
 
-my.logreg5 <- glm(AwarenessBin ~ factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg5 <- glm(AwarenessBin ~ Children + poverty_level_Real + factor(race) + factor(Weekspermonth_on_SNAP) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg5)  # for p-values 
 
-##Implications and Analysis##############################################################################################################
-#Running all of these logistic regressions, the conclusions include: 
-#When comparing directly the number of children and awareness, it is statistically significant, but once you start factoring in Years on SNAP and race, what is extremely significant in awareness of EWBW program is for people who have used SNAP for less than a year. 
-#This means that the Rhode Island public health institute of doing really well with getting in front of people who have just started to use SNAP, but for people who have used snap for a while, it is not as direct in the families using SNAP to be aware of the program.
-#Future implications of our findings include focusing more on informing families with children and to focus more on directing marketing materials and making people aware of it for SNAP users who have used it for more than a few years.
-
+my.logreg6 <- glm(AwarenessBin ~ factor(Household_Security) + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+summary(my.logreg6)  # for p-values 

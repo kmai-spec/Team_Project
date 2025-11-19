@@ -466,17 +466,13 @@ EWBW |>
   geom_bar() + 
   ggtitle("poverty_level_Real of Respondents")
 
-EWBW |>
-  filter(!is.na(poverty_level_Real)) |> 
-  ggplot(aes(x = poverty_level_Real, fill = poverty_level_Real)) + 
+ggplot(
+  data = EWBW |> dplyr::filter(!is.na(poverty_level_Real)),
+  aes(x = poverty_level_Real, fill = poverty_level_Real)
+) +
   geom_bar() +
   scale_fill_brewer(palette = "Set2") +
-  ggtitle("poverty_level_Real of Respondents") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    legend.position = "none"
-  )
+  theme_minimal()
 
 #Main Variables of Interest: Awareness and # of Children
 ggplot(data=EWBW) +
@@ -502,8 +498,11 @@ tab2 <- table(EWBW$Awareness, EWBW$Household_Security)
 tab3 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
 
 ##Hypothesis Testing##############################################################################################################
-myChi <- chisq.test(EWBW$Awareness, EWBW$Children) 
+myChi <- chisq.test(EWBW$Awareness, EWBW$poverty_level_Real) 
 myChi 
+
+myAnovaResults <- aov(Awareness ~ poverty_level_Real, data = EWBW) 
+summary(myAnovaResults)
 
 myChi2 <- chisq.test(EWBW$Awareness, EWBW$Household_Security) 
 myChi2
@@ -512,6 +511,7 @@ EWBW$AwarenessBin[EWBW$Awareness=="Yes"]<-1
 EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
 
 #Logistic Regression
+
 
 my.logreg7 <- glm(AwarenessBin ~ MixedTotal, data = EWBW, family = "binomial") 
 summary(my.logreg7)
@@ -539,5 +539,5 @@ summary(my.logreg5)
 exp(my.logreg5$coefficients) 
 
 library(sjPlot)
-tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, my.logreg6)
+tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5)
 

@@ -2,6 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(descr)
 
+##################Filtering the Data set to Only Include EWBW Eligible People###################################
 EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
 #Subset to people who said yes: freq(EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
 names(EWBW)[names(EWBW)== "Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps."] <- "Eligible"
@@ -56,7 +57,7 @@ freq(EWBW$not_eligible)
 # Exclude those not eligible to participate (n=1216)
 EWBW <- EWBW %>% filter(not_eligible == 0)
 
-##Starting the data cleaning process############################################################################################################
+##Age + Race Cleaning Up############################################################################################################
 
 #Age
 names(EWBW)[names(EWBW)== "How.old.are.you."] <- "Age"
@@ -76,41 +77,6 @@ names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Plea
 names(EWBW)[names(EWBW)== "Other..please.describe."] <- "Other_Description"
 
 ################################################################################################
-#Cleaning Up Other Description
-##EWBW$Other_Description[EWBW$Other_Description==""]<-NA
-EWBW$Other_Description[EWBW$Other_Description=="bi racial"]<-"Mixed"
-EWBW$Other_Description[EWBW$Other_Description=="hispanic"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispanic"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispanic "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispano "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispanic or Latino "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="White"]<-"Caucasian/White"
-EWBW$Other_Description[EWBW$Other_Description=="Spanish"]<-"Spanish"
-EWBW$Other_Description[EWBW$Other_Description=="Spanish "]<-"Spanish"
-EWBW$Other_Description[EWBW$Other_Description=="Puerto rican"]<-"PR"
-EWBW$Other_Description[EWBW$Other_Description=="Portuguese. So Hispanic and maybe Moorish"]<-"Portugese"
-EWBW$Other_Description[EWBW$Other_Description=="European"]<-"European"
-EWBW$Other_Description[EWBW$Other_Description=="White and black"]<-"Caucasian/White"
-EWBW$Other_Description[EWBW$Other_Description=="hispanish"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Multi"]<-"Mixed"
-EWBW$Other_Description[EWBW$Other_Description=="latino hispano"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Latino"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Portuguese "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Dominican "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispana"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Cape Verdian"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Cape verdian white "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Middle eastern"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Puerto Rico "]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="white"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="P. R. and Indian"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Hispano,latino"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Puerto rico"]<-"Hispanic"
-EWBW$Other_Description[EWBW$Other_Description=="Biracial ( two or more races )"]<-"Mixed"
-EWBW$Other_Description[EWBW$Other_Description=="Trinidad Tobago/Venezuela "]<-"Hispanic"
-
-################################################################################################
-
 #Race
 EWBW$race<-NA
 EWBW$race[EWBW$`African American/Black`=="Checked"]<-"African American/Black"
@@ -126,25 +92,6 @@ EWBW$race[(EWBW$`Asian`=="Checked" & EWBW$`Caucasian/White`=="Checked") | (EWBW$
 EWBW$race[(EWBW$`African American/Black`=="Checked"&EWBW$`Caucasian/White`=="Checked") | (EWBW$`African American/Black`=="Checked"&EWBW$`American Indian/Alaskan Native`=="Checked") | (EWBW$`African American/Black`=="Checked"&EWBW$`Native Hawaiian/Pacific Islander`=="Checked")]<-"Mixed"
 EWBW$race[(EWBW$`Caucasian/White`=="Checked" & EWBW$`American Indian/Alaskan Native`=="Checked") | (EWBW$`Caucasian/White`=="Checked" & EWBW$`Native Hawaiian/Pacific Islander`=="Checked")]<-"Mixed"
 EWBW$race[(EWBW$`American Indian/Alaskan Native`=="Checked" & EWBW$`Native Hawaiian/Pacific Islander`=="Checked")]<-"Mixed"
-
-EWBW$AsianBin<-0
-EWBW$AsianBin[EWBW$`Asian`=="Checked"]<-1
-
-EWBW$WhiteBin<-0
-EWBW$WhiteBin[EWBW$`Caucasian/White`=="Checked"]<-1
-
-EWBW$BlackBin<-0
-EWBW$BlackBin[EWBW$`African American/Black`=="Checked"]<-1
-
-EWBW$AmericanIndianBin<-0
-EWBW$AmericanIndianBin[EWBW$`American Indian/Alaskan Native`=="Checked"]<-1
-
-EWBW$NativeBin<-0
-EWBW$NativeBin[EWBW$`Native Hawaiian/Pacific Islander`=="Checked"]<-1
-
-EWBW$RaceSum<-EWBW$NativeBin + EWBW$AmericanIndianBin + EWBW$WhiteBin + EWBW$AsianBin + EWBW$BlackBin
-EWBW$MixedTotal[EWBW$RaceSum>1]<-1
-EWBW$MixedTotal[EWBW$RaceSum==1]<-0
 
 #Code as NA
 EWBW$race[EWBW$`Not_To_Answer`=="Checked"]<-"Not_To_Answer"
@@ -275,15 +222,22 @@ EWBW <- EWBW %>%
   )
 freq(EWBW$poverty_level)
 
-# collapse smaller categories
+# collapse poverty levels to smaller categories: <100%, 100-200%, >200%
 EWBW$poverty_level_Real <- EWBW$poverty_level
 EWBW$poverty_level_Real[EWBW$poverty_level %in% c("200%-300%","300%-400%","400%-500%",">500%")] <- ">200%"
 freq(EWBW$poverty_level_Real)
 
 names(EWBW)[names(EWBW)== "How.many.children.are.in.your.household."] <- "Children"
 EWBW$Children<-as.numeric(EWBW$Children)
+EWBW$Children[EWBW$Household.size==1] <- 0
 
-#Creating the US Household Food Security
+#Turn Children into categorical: Zero, One, Two, More than Two
+EWBW$ChildrenCat[EWBW$Children==0] <- "Zero"
+EWBW$ChildrenCat[EWBW$Children==1] <- "One"
+EWBW$ChildrenCat[EWBW$Children==2] <- "Two"
+EWBW$ChildrenCat[EWBW$Children>2] <- "More than Two"
+
+#Creating the US Household Food Security: To Identify if poverty is very low, low, or high
 names(EWBW)[names(EWBW)== "X.The.food.that.we.bought.just.didn.t.last.and.we.didn.t.have.money.to.get.more...Was.that.often..sometimes..or.never.true.for..you.or.your.household.n.the.last.12.months.."] <- "HH3"
 EWBW$HH3[EWBW$HH3==""] <- "NA"
 EWBW$HH3[EWBW$HH3=="Choose not to answer"] <- "NA"
@@ -342,6 +296,24 @@ EWBW$Household_Security [EWBW$SumPoint<=1] <- "High"
 EWBW$Household_Security [EWBW$SumPoint>1 & EWBW$SumPoint<=4] <- "Low"
 EWBW$Household_Security [EWBW$SumPoint>=5] <- "Very Low"
 
+EWBW$AwarenessBin[EWBW$Awareness=="Yes"]<-1
+EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
+
+is.factor(EWBW$ChildrenCat)
+EWBW$ChildrenCat <- factor(
+  EWBW$ChildrenCat,
+  levels = c("Zero", "One", "Two", "More than Two")
+)
+EWBW$ChildrenCat <- relevel(EWBW$ChildrenCat, ref = "Zero")
+
+
+is.factor(EWBW$Years_on_SNAP)
+EWBW$Years_on_SNAP <- factor(
+  EWBW$Years_on_SNAP,
+  levels = c("Less than a year", "1-2 years", "2-5 years", "Greater than 5 years")
+)
+EWBW$Years_on_SNAP <- relevel(EWBW$Years_on_SNAP, ref = "Less than a year")
+
 ##Subsetting to start analysis ##############################################################################################################
 EWBW$Awareness[EWBW$Awareness=="NA"]<-NA
 EWBW$Weekspermonth_on_SNAP[EWBW$Weekspermonth_on_SNAP=="NA"]<-NA
@@ -361,183 +333,108 @@ freq(EWBW$poverty_level_Real)
 freq(EWBW$Hispanic_Latino)
 freq(EWBW$race)
 freq(EWBW$Household_Security)
+freq(EWBW$ChildrenCat)
 
-#Univariate Graphs of Interest
-#Awareness is the main response variable
-ggplot(data=EWBW)+
-  geom_bar(aes(x=Awareness))+
-  ggtitle("Awareness of EWBW Program")
+############Bivariate Analysis###############################################################################################################
+df <- EWBW %>%
+  filter(!is.na(ChildrenCat), !is.na(poverty_level_Real), !is.na(Hispanic_Latino), !is.na(Years_on_SNAP))
 
-ggplot(data = subset(EWBW, !is.na(Awareness))) +
-  geom_bar(aes(x = Awareness, fill = Awareness)) +
-  scale_fill_brewer(palette = "Set2") +
-  ggtitle("Awareness of EWBW Program") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  )
+ggplot(data=df) +
+  stat_summary(aes(x=ChildrenCat, y=AwarenessBin),  fun="mean", geom="bar", fill = "4A4A4A") + 
+  ylab("Awareness of the EWBW Program") +
+  xlab("Number of Children")+
+  ggtitle("The number of Children is related to the Awareness of the Program")
 
+ggplot(data=df) +
+  stat_summary(aes(x=Hispanic_Latino, y=AwarenessBin),  fun="mean", geom="bar", fill = "4A4A4A") + 
+  ylab("Awareness of the EWBW Program") +
+  ggtitle("Hispanic/Latino Identifying People are Less Aware of the Program")
 
+ggplot(data=df) +
+  stat_summary(aes(x=Years_on_SNAP, y=AwarenessBin),  fun="mean", geom="bar", fill = "4A4A4A") + 
+  ylab("Awareness of the EWBW Program") +
+  ggtitle("New participants in the SNAP Program are less aware of the EWBW Program")
 
-#Removing the NA from the Awareness column temporary for Graph
-EWBW |>
-  filter(!is.na(Awareness)) |> 
-  ggplot(aes(x = Awareness)) + 
-  geom_bar() + 
-  ggtitle("Awareness of EWBW Program")
+ggplot(data=df) +
+  stat_summary(aes(x=ChildrenCat, y=AwarenessBin),  fun="mean", geom="bar", fill = "4A4A4A") + 
+  facet_grid(. ~ Hispanic_Latino)+
+  ylab("Awareness of the EWBW Program") +
+  xlab("Number of Children")+
+  ggtitle("The number of Children is related to the Awareness of the Program by Ethnicity")
 
-#Children and household income as an explanatory variable
-ggplot(data=EWBW)+
-  geom_histogram(aes(x=Children))+
-  ggtitle("Number of Children")
+ggplot(data=df) +
+  stat_summary(aes(x=ChildrenCat, y=AwarenessBin),  fun="mean", geom="bar", fill = "4A4A4A") + 
+  facet_grid(. ~ Years_on_SNAP)+
+  ylab("Awareness of the EWBW Program") +
+  xlab("Number of Children")+
+  ggtitle("The number of Children is related to the Awareness of the Program by the Years on SNAP")
 
-ggplot(data = subset(EWBW, !is.na(Children))) +
-  geom_histogram(
-    aes(x = Children, fill = as.factor(Children)),
-    bins = 8,
-    color = "white"
-  ) +
-  scale_fill_brewer(palette = "Set2") +
-  ggtitle("Number of Children") +
-  xlab("Number of Children per Respondent") +
-  ylab("Number of Respondents") +
-  theme_minimal(base_size = 14) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5),
-    legend.position = "none",
-    panel.grid.minor = element_blank()
-  )
-
-
-
-
-EWBW |>
-  filter(!is.na(Household_Security)) |> 
-  ggplot(aes(x = Household_Security)) + 
-  geom_bar() + 
-  ggtitle("Awareness of EWBW Program")
-
-#Removing the NA from the Household income column temporary for Graph
-EWBW |>
-  filter(!is.na(Household_Security)) |> 
-  ggplot(aes(x = Household_Security)) + 
-  geom_bar() + 
-  ggtitle("Household Income of Respondents")
-
-EWBW |>
-  filter(!is.na(Household_Security)) |>
-  ggplot(aes(x = Household_Security, fill = Household_Security)) +
-  geom_bar() +
-  scale_fill_brewer(palette = "Set2") +
-  ggtitle("Household Income of Respondents") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    legend.position = "none"
-  )
-
-
-#Race of Respondents
-EWBW |>
-  filter(!is.na(race)) |> 
-  ggplot(aes(x = race)) + 
-  geom_bar() + 
-  ggtitle("Race of Respondents")
-
-ggplot(data = subset(EWBW, !is.na(Hispanic_Latino))) +
-  geom_bar(aes(x = Hispanic_Latino, fill = Hispanic_Latino)) +
-  scale_fill_brewer(palette = "Set2") +
-  ggtitle("Ethnicity of Respondents") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank()
-  )
-
-#poverty_level_Real of Respondents
-EWBW |>
-  filter(!is.na(poverty_level_Real)) |> 
-  ggplot(aes(x = poverty_level_Real)) + 
-  geom_bar() + 
-  ggtitle("poverty_level_Real of Respondents")
-
-ggplot(
-  data = EWBW |> dplyr::filter(!is.na(poverty_level_Real)),
-  aes(x = poverty_level_Real, fill = poverty_level_Real)
-) +
-  geom_bar() +
-  scale_fill_brewer(palette = "Set2") +
-  theme_minimal()
-
-#Main Variables of Interest: Awareness and # of Children
-ggplot(data=EWBW) +
-  stat_summary(aes(x=Children, y=Awareness),  fun="mean", geom="bar") +
-  ylab("Awareness") +
-  xlab("Average number of Children") + 
-  ggtitle("Number of Children and Awareness")
-
-ggplot(data = subset(EWBW, !is.na(Children) & !is.na(Awareness))) +
-  stat_summary(aes(x = Children, y = Awareness), fun = "mean", geom = "bar", fill = "#69b3a2") +
-  ylab("Awareness") +
-  xlab("Average Number of Children") +
-  ggtitle("Number of Children and Awareness") +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
-  )
-
-
-#Awareness and Household Income
-tab1 <- table(EWBW$Awareness, EWBW$Children)
+##########Awareness and Household Income#####################################################################################################
+tab1 <- table(EWBW$Awareness, EWBW$Years_on_SNAP)
 tab2 <- table(EWBW$Awareness, EWBW$Household_Security)
 tab3 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
 
-##Hypothesis Testing##############################################################################################################
+##########Hypothesis Testing##################################################################################################################
 myChi <- chisq.test(EWBW$Awareness, EWBW$poverty_level_Real) 
 myChi 
 
-myAnovaResults <- aov(Awareness ~ poverty_level_Real, data = EWBW) 
-summary(myAnovaResults)
-
-myChi2 <- chisq.test(EWBW$Awareness, EWBW$Household_Security) 
+myChi2 <- chisq.test(EWBW$Awareness, EWBW$Children) 
 myChi2
 
-EWBW$AwarenessBin[EWBW$Awareness=="Yes"]<-1
-EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
+myChi3 <- chisq.test(EWBW$Awareness, EWBW$Weekspermonth_on_SNAP) 
+myChi3
+
+myChi4 <- chisq.test(EWBW$Awareness, EWBW$Years_on_SNAP) 
+myChi4
+
+myChi5 <- chisq.test(EWBW$Awareness, EWBW$Hispanic_Latino) 
+myChi5
+
+myChi6 <- chisq.test(EWBW$Awareness, EWBW$White) 
+myChi6
+
+myChi7 <- chisq.test(EWBW$Awareness, EWBW$Black) 
+myChi7
+
+myChi8 <- chisq.test(EWBW$Awareness, EWBW$Mixed) 
+myChi8
+
+myChi9 <- chisq.test(EWBW$Awareness, EWBW$Household_Security) 
+myChi9
+
+myChi10 <- chisq.test(EWBW$Awareness, EWBW$ChildrenCat) 
+myChi10
+
+myAnovaResults <- aov(Age ~ Awareness, data = EWBW) 
+summary(myAnovaResults)
+
+
 
 #Logistic Regression
 
-
-my.logreg7 <- glm(AwarenessBin ~ MixedTotal, data = EWBW, family = "binomial") 
-summary(my.logreg7)
-
-my.logreg <- glm(AwarenessBin ~ Children, data = EWBW, family = "binomial") 
+library(sjPlot)
+my.logreg <- glm(AwarenessBin ~ ChildrenCat, data = EWBW, family = "binomial") 
 summary(my.logreg)
 exp(my.logreg$coefficients) 
 tab_model(my.logreg)
 
-my.logreg1 <- glm(AwarenessBin ~ Children + poverty_level_Real, data = EWBW, family = "binomial") 
+my.logreg1 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real, data = EWBW, family = "binomial") 
 summary(my.logreg1) 
 
-my.logreg2 <- glm(AwarenessBin ~ Children + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg2 <- glm(AwarenessBin ~ ChildrenCat + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg2)  
 
-my.logreg3 <- glm(AwarenessBin ~ Children + Hispanic_Latino, data = EWBW, family = "binomial") 
+my.logreg3 <- glm(AwarenessBin ~ ChildrenCat + Hispanic_Latino, data = EWBW, family = "binomial") 
 summary(my.logreg3) 
 exp(my.logreg3$coefficients) 
 
-my.logreg4 <- glm(AwarenessBin ~ Children + White + Black, data = EWBW, family = "binomial") 
+my.logreg4 <- glm(AwarenessBin ~ ChildrenCat + White + Black, data = EWBW, family = "binomial") 
 summary(my.logreg4)  
 
-my.logreg5 <- glm(AwarenessBin ~ Children + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg5 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
 summary(my.logreg5)  
 exp(my.logreg5$coefficients) 
+tab_model(my.logreg5)
 
-library(sjPlot)
-tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5)
+tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, title = "Logistic Regression Results")
 

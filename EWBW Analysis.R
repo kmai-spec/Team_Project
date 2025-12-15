@@ -45,7 +45,7 @@ EWBW$HEARDABOUT_EWBW[EWBW$HEARDABOUT_EWBW=="NA"] <- NA
 EWBW <- EWBW %>%
   mutate(
     not_eligible = if_else(
-      is.na(Years_on_SNAP ) &
+      is.na(Years_on_SNAP) &
         is.na(Adequate) &
         is.na(Weekspermonth_on_SNAP) &
         is.na(HEARDABOUT_EWBW),
@@ -57,7 +57,7 @@ freq(EWBW$not_eligible)
 # Exclude those not eligible to participate (n=1216)
 EWBW <- EWBW %>% filter(not_eligible == 0)
 
-##Age + Race Cleaning Up############################################################################################################
+##Age + Race Cleaning Up########################################################################################################################################
 
 #Age
 names(EWBW)[names(EWBW)== "How.old.are.you."] <- "Age"
@@ -76,7 +76,7 @@ names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Plea
 names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Please.select.all.that.apply..choice.Dont.Know."] <- "Don't_Know"
 names(EWBW)[names(EWBW)== "Other..please.describe."] <- "Other_Description"
 
-################################################################################################
+################################################################################################################################################################
 #Race
 EWBW$race<-NA
 EWBW$race[EWBW$`African American/Black`=="Checked"]<-"African American/Black"
@@ -235,7 +235,7 @@ EWBW$Children[EWBW$Household.size==1] <- 0
 EWBW$ChildrenCat[EWBW$Children==0] <- "Zero"
 EWBW$ChildrenCat[EWBW$Children==1] <- "One"
 EWBW$ChildrenCat[EWBW$Children==2] <- "Two"
-EWBW$ChildrenCat[EWBW$Children>2] <- "More than Two"
+EWBW$ChildrenCat[EWBW$Children>2] <- "Three or More"
 
 #Creating the US Household Food Security: To Identify if poverty is very low, low, or high
 names(EWBW)[names(EWBW)== "X.The.food.that.we.bought.just.didn.t.last.and.we.didn.t.have.money.to.get.more...Was.that.often..sometimes..or.never.true.for..you.or.your.household.n.the.last.12.months.."] <- "HH3"
@@ -302,7 +302,7 @@ EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
 is.factor(EWBW$ChildrenCat)
 EWBW$ChildrenCat <- factor(
   EWBW$ChildrenCat,
-  levels = c("Zero", "One", "Two", "More than Two")
+  levels = c("Zero", "One", "Two", "Three or More")
 )
 EWBW$ChildrenCat <- relevel(EWBW$ChildrenCat, ref = "Zero")
 
@@ -369,10 +369,12 @@ ggplot(data=df) +
   xlab("Number of Children")+
   ggtitle("The number of Children is related to the Awareness of the Program by the Years on SNAP")
 
-##########Awareness and Household Income#####################################################################################################
-tab1 <- table(EWBW$Awareness, EWBW$Years_on_SNAP)
-tab2 <- table(EWBW$Awareness, EWBW$Household_Security)
-tab3 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
+##########Bivariate Tables Analysis#####################################################################################################
+tab1 <- table(EWBW$Awareness, EWBW$Children)
+tab1 <- table(EWBW$Awareness, EWBW$Hispanic_Latino)
+tab2 <- table(EWBW$Awareness, EWBW$Years_on_SNAP)
+tab3 <- table(EWBW$Awareness, EWBW$Household_Security)
+tab4 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
 
 ##########Hypothesis Testing##################################################################################################################
 myChi <- chisq.test(EWBW$Awareness, EWBW$poverty_level_Real) 
@@ -410,7 +412,7 @@ summary(myAnovaResults)
 
 
 
-#Logistic Regression
+##################Logistic Regression################################################################################
 
 library(sjPlot)
 my.logreg <- glm(AwarenessBin ~ ChildrenCat, data = EWBW, family = "binomial") 
@@ -437,4 +439,3 @@ exp(my.logreg5$coefficients)
 tab_model(my.logreg5)
 
 tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, title = "Logistic Regression Results")
-

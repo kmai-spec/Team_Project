@@ -1,8 +1,9 @@
 library(ggplot2)
 library(dplyr)
 library(descr)
+library(sjPlot)
 
-##################Filtering the Data set to Only Include EWBW Eligible People###################################
+##################Filtering the Data set to Only Include EWBW Eligible People############################################################################################
 EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
 #Subset to people who said yes: freq(EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
 names(EWBW)[names(EWBW)== "Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps."] <- "Eligible"
@@ -57,14 +58,7 @@ freq(EWBW$not_eligible)
 # Exclude those not eligible to participate (n=1216)
 EWBW <- EWBW %>% filter(not_eligible == 0)
 
-##Age + Race Cleaning Up########################################################################################################################################
-
-#Age
-names(EWBW)[names(EWBW)== "How.old.are.you."] <- "Age"
-EWBW$Age[EWBW$Age>120]<- NA
-EWBW$Age<-as.numeric(EWBW$Age)
-
-
+#####################Data Management########################################################################################################################################
 #Race Variables (Hispanic vs Not, Black vs Not, White vs Not)
 names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Please.select.all.that.apply..choice.African.American.or.Black."] <- "African American/Black"
 names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Please.select.all.that.apply..choice.Caucasian.or.White."] <- "Caucasian/White"
@@ -76,8 +70,6 @@ names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Plea
 names(EWBW)[names(EWBW)== "Which.of.the.following.best.describes.your.race..Please.select.all.that.apply..choice.Dont.Know."] <- "Don't_Know"
 names(EWBW)[names(EWBW)== "Other..please.describe."] <- "Other_Description"
 
-################################################################################################################################################################
-#Race
 EWBW$race<-NA
 EWBW$race[EWBW$`African American/Black`=="Checked"]<-"African American/Black"
 EWBW$race[EWBW$`Caucasian/White`=="Checked"]<-"Caucasian/White"
@@ -112,7 +104,7 @@ EWBW$Hispanic_Latino[EWBW$Hispanic_Latino==""] <- "NA"
 EWBW$Hispanic_Latino[EWBW$Hispanic_Latino=="Choose not to answer"] <- "NA"
 EWBW$Hispanic_Latino[EWBW$Hispanic_Latino=="Don't Know"] <- "NA"
 
-#Household Information
+#Household Income Consolidation into Poverty Levels
 names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes.."] <- "Household_Income1"
 names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...1"] <- "Household_Income2"
 names(EWBW)[names(EWBW)== "What.is.your.annual.household.income..before.taxes...2"] <- "Household_Income3"
@@ -231,13 +223,13 @@ names(EWBW)[names(EWBW)== "How.many.children.are.in.your.household."] <- "Childr
 EWBW$Children<-as.numeric(EWBW$Children)
 EWBW$Children[EWBW$Household.size==1] <- 0
 
-#Turn Children into categorical: Zero, One, Two, More than Two
+#Turn Children into categorical: Zero, One, Two, Three or More
 EWBW$ChildrenCat[EWBW$Children==0] <- "Zero"
 EWBW$ChildrenCat[EWBW$Children==1] <- "One"
 EWBW$ChildrenCat[EWBW$Children==2] <- "Two"
 EWBW$ChildrenCat[EWBW$Children>2] <- "Three or More"
 
-#Creating the US Household Food Security: To Identify if poverty is very low, low, or high
+#Creation of Household Security
 names(EWBW)[names(EWBW)== "X.The.food.that.we.bought.just.didn.t.last.and.we.didn.t.have.money.to.get.more...Was.that.often..sometimes..or.never.true.for..you.or.your.household.n.the.last.12.months.."] <- "HH3"
 EWBW$HH3[EWBW$HH3==""] <- "NA"
 EWBW$HH3[EWBW$HH3=="Choose not to answer"] <- "NA"
@@ -370,11 +362,16 @@ ggplot(data=df) +
   ggtitle("The number of Children is related to the Awareness of the Program by the Years on SNAP")
 
 ##########Bivariate Tables Analysis#####################################################################################################
-tab1 <- table(EWBW$Awareness, EWBW$Children)
-tab1 <- table(EWBW$Awareness, EWBW$Hispanic_Latino)
-tab2 <- table(EWBW$Awareness, EWBW$Years_on_SNAP)
-tab3 <- table(EWBW$Awareness, EWBW$Household_Security)
-tab4 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
+tab1 <- table(EWBW$Awareness, EWBW$ChildrenCat)
+tab1_colProp <- prop.table(tab1, 2)
+tab2 <- table(EWBW$Awareness, EWBW$Hispanic_Latino)
+tab2_colProp <- prop.table(tab2, 2)
+tab3 <- table(EWBW$Awareness, EWBW$Years_on_SNAP)
+tab3_colProp <- prop.table(tab3, 2)
+tab4 <- table(EWBW$Awareness, EWBW$Household_Security)
+tab4_colProp <- prop.table(tab4, 2)
+tab5 <- table(EWBW$Awareness, EWBW$poverty_level_Real)
+tab5_colProp <- prop.table(tab5, 2)
 
 ##########Hypothesis Testing##################################################################################################################
 myChi <- chisq.test(EWBW$Awareness, EWBW$poverty_level_Real) 
@@ -413,8 +410,6 @@ summary(myAnovaResults)
 
 
 ##################Logistic Regression################################################################################
-
-library(sjPlot)
 my.logreg <- glm(AwarenessBin ~ ChildrenCat, data = EWBW, family = "binomial") 
 summary(my.logreg)
 exp(my.logreg$coefficients) 
@@ -433,9 +428,12 @@ exp(my.logreg3$coefficients)
 my.logreg4 <- glm(AwarenessBin ~ ChildrenCat + White + Black, data = EWBW, family = "binomial") 
 summary(my.logreg4)  
 
-my.logreg5 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg5 <- glm(AwarenessBin ~ ChildrenCat + Household_Security, data = EWBW, family = "binomial") 
 summary(my.logreg5)  
-exp(my.logreg5$coefficients) 
-tab_model(my.logreg5)
+
+my.logreg6 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+summary(my.logreg6)  
+exp(my.logreg6$coefficients) 
+tab_model(my.logreg6)
 
 tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, title = "Logistic Regression Results")

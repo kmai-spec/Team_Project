@@ -4,7 +4,7 @@ library(descr)
 library(sjPlot)
 
 ##################Filtering the Data set to Only Include EWBW Eligible People############################################################################################
-EWBW <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
+EWBW2 <- read.csv("~/Downloads/EWBWEvaluation_ALL_DATA_Clean_March_2025.csv")
 #Subset to people who said yes: freq(EWBW$Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps.)
 names(EWBW)[names(EWBW)== "Do.you.participate.in.the.Supplemental.Nutrition.Assistance.Program..SNAP...SNAP.is.sometimes.known.an.EBT.card.or.food.stamps."] <- "Eligible"
 #Number of Years on SNAP
@@ -288,6 +288,14 @@ EWBW$Household_Security [EWBW$SumPoint<=1] <- "High"
 EWBW$Household_Security [EWBW$SumPoint>1 & EWBW$SumPoint<=4] <- "Low"
 EWBW$Household_Security [EWBW$SumPoint>=5] <- "Very Low"
 
+is.factor(EWBW$Household_Security)
+EWBW$Household_Security <- factor(
+  EWBW$Household_Security,
+  levels = c("Very Low", "Low", "High")
+)
+EWBW$Household_Security <- relevel(EWBW$Household_Security, ref = "Very Low")
+
+
 EWBW$AwarenessBin[EWBW$Awareness=="Yes"]<-1
 EWBW$AwarenessBin[EWBW$Awareness=="No"]<-0
 
@@ -431,9 +439,9 @@ summary(my.logreg4)
 my.logreg5 <- glm(AwarenessBin ~ ChildrenCat + Household_Security, data = EWBW, family = "binomial") 
 summary(my.logreg5)  
 
-my.logreg6 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP), data = EWBW, family = "binomial") 
+my.logreg6 <- glm(AwarenessBin ~ ChildrenCat + poverty_level_Real + White + Black + Hispanic_Latino + factor(Years_on_SNAP) + Household_Security, data = EWBW, family = "binomial") 
 summary(my.logreg6)  
 exp(my.logreg6$coefficients) 
 tab_model(my.logreg6)
 
-tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, title = "Logistic Regression Results")
+tab_model(my.logreg, my.logreg1, my.logreg2, my.logreg3, my.logreg4, my.logreg5, my.logreg6, title = "Logistic Regression Results")

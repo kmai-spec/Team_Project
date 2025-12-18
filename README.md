@@ -1,5 +1,7 @@
 Author: Colin Tsay, Sydney Cameron, and Kenny Mai
+
 Institution: Wesleyan University
+
 Course: QAC380 - Statistical Consulting
 
 # Demographic Differences Among ​SNAP Participants in Eat Well Be Well Program Awareness

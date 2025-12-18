@@ -1,5 +1,5 @@
-Author: Colin Tsay, Sydney Cameron, and Kenny Mai
-Institution: Wesleyan University
+Author: Colin Tsay, Sydney Cameron, and Kenny Mai\n
+Institution: Wesleyan University\n
 Course: QAC380 - Statistical Consulting
 
 # Demographic Differences Among ​SNAP Participants in Eat Well Be Well Program Awareness
